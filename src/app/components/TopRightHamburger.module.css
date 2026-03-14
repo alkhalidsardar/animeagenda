@@ -16,51 +16,120 @@
   cursor: default;
 }
 
-.userStatus {
+.userMenu {
   position: fixed;
   z-index: 40;
   top: calc(env(safe-area-inset-top) + 0.75rem);
   right: calc(env(safe-area-inset-right) + 0.75rem);
+}
+
+.userStatusButton {
   display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.45rem 0.4rem 0.8rem;
+  align-items: stretch;
+  height: 2.4rem;
+  padding: 0;
   border: 1px solid rgb(27 31 37 / 85%);
   border-radius: 0.45rem;
   background: rgb(24 28 31 / 74%);
   box-shadow: 0 8px 24px rgb(0 0 0 / 36%);
-  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.userStatusButton:hover {
+  border-color: #36414e;
+}
+
+.userStatusButton:focus-visible {
+  outline: 2px solid #64788f;
+  outline-offset: 2px;
+}
+
+.userStatusButton .userName {
+  display: inline-flex;
+  align-items: center;
+  min-height: 100%;
+  padding: 0 0.9rem;
 }
 
 .userName {
   color: #e6edf6;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1;
 }
 
-.logoutButton {
+.userDoorPanel {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid #29303a;
-  border-radius: 0.32rem;
+  min-height: 100%;
+  width: 2.5rem;
+  border-left: 1px solid #29303a;
   color: #eef3f8;
   background: rgb(15 18 23 / 88%);
-  cursor: pointer;
-  transition: border-color 180ms ease, background-color 180ms ease;
 }
 
-.logoutButton:hover {
-  border-color: #3e4856;
+.userStatusButton:hover .userDoorPanel {
   background: #141a21;
 }
 
 .logoutIcon {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.26rem;
+  height: 1.26rem;
+}
+
+.logoutPrompt {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  width: min(16.5rem, calc(100vw - 1.5rem));
+  padding: 0.7rem;
+  border: 1px solid #2d3742;
+  border-radius: 0.45rem;
+  background: rgb(17 20 26 / 95%);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 42%);
+}
+
+.logoutPromptText {
+  margin: 0;
+  color: #d8e0ea;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
+.logoutPromptActions {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.promptButton {
+  flex: 1 1 0;
+  min-height: 2rem;
+  border: 1px solid #354150;
+  border-radius: 0.35rem;
+  color: #deebf8;
+  background: #1a2028;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.promptButton:hover {
+  border-color: #45586d;
+  background: #202a35;
+}
+
+.promptButtonDanger {
+  border-color: #7b4141;
+  background: #4c2323;
+  color: #ffe7e7;
+}
+
+.promptButtonDanger:hover {
+  border-color: #9c5252;
+  background: #5f2b2b;
 }
 
 .button {
@@ -74,7 +143,6 @@
   border-radius: 0.5rem;
   background: rgb(6 6 6 / 45%);
   box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
-  backdrop-filter: blur(4px);
   transition: width 300ms ease, height 300ms ease;
 }
 
@@ -105,7 +173,6 @@
   border-radius: 0.35rem;
   background: rgb(24 28 31 / 72%);
   box-shadow: 0 18px 40px rgb(0 0 0 / 32%);
-  backdrop-filter: blur(8px);
   cursor: default;
 }
 
@@ -247,7 +314,6 @@
   padding-bottom: 1rem;
   border-right: 1px solid #1b1f25;
   background: rgb(8 10 12 / 96%);
-  backdrop-filter: blur(8px);
   transform: translateX(-100%);
   transition: transform 320ms ease;
   cursor: default;
@@ -329,13 +395,21 @@
 }
 
 @media (max-width: 520px) {
-  .userStatus {
+  .userMenu {
     right: calc(env(safe-area-inset-right) + 0.5rem);
-    max-width: calc(100vw - 1rem);
   }
 
-  .userName {
-    font-size: 0.82rem;
+  .userStatusButton .userName {
+    font-size: 0.95rem;
+    padding-inline: 0.72rem;
+  }
+
+  .userDoorPanel {
+    width: 2.28rem;
+  }
+
+  .logoutPrompt {
+    width: min(15.25rem, calc(100vw - 1rem));
   }
 
   .wrapper {

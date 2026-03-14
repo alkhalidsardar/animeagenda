@@ -17,6 +17,11 @@ body {
   cursor: auto;
 }
 
+/* Safety net: keep cursor visible even if another style sets it to none. */
+body * {
+  cursor: auto !important;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -38,7 +43,17 @@ a {
 
 button,
 [role="button"] {
-  cursor: pointer;
+  cursor: pointer !important;
+}
+
+a {
+  cursor: pointer !important;
+}
+
+input,
+textarea,
+select {
+  cursor: text !important;
 }
 
 @media (prefers-color-scheme: dark) {

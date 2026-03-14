@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./TopRightHamburger.module.css";
 
 const IconHome = () => (
@@ -54,18 +55,21 @@ const IconGuide = () => (
 
 const IconDoor = () => (
   <svg viewBox="0 0 24 24" className={styles.logoutIcon} aria-hidden="true">
+    <path fill="currentColor" d="M3 3.5L10 1v22L3 20.5V3.5Z" />
     <path
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.9"
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M13 4h6a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-6M10 17l-3-3 3-3M7 14h8M4 4h6a1 1 0 0 1 1 1v3M4 20h6a1 1 0 0 0 1-1v-3"
+      d="M12 4.5h7.2v15H12V4.5Zm4.1 7.5h.01"
     />
   </svg>
 );
 
 export default function TopRightHamburger() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +80,9 @@ export default function TopRightHamburger() {
     return window.localStorage.getItem("animeagenda_user");
   });
   const [authError, setAuthError] = useState("");
+  const [showLogoutPrompt, setShowLogoutPrompt] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const homeHref = signedInUser ? "/home" : "/";
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -83,6 +90,46 @@ export default function TopRightHamburger() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  useEffect(() => {
+    if (signedInUser && pathname === "/") {
+      router.replace("/home");
+      return;
+    }
+
+    if (!signedInUser && pathname === "/home") {
+      router.replace("/");
+    }
+  }, [pathname, router, signedInUser]);
+
+  useEffect(() => {
+    if (!showLogoutPrompt) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const targetNode = event.target as Node | null;
+      if (targetNode && !userMenuRef.current?.contains(targetNode)) {
+        setShowLogoutPrompt(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowLogoutPrompt(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showLogoutPrompt]);
 
   function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,6 +144,8 @@ export default function TopRightHamburger() {
     window.localStorage.setItem("animeagenda_user", nextUser);
     setAuthError("");
     setPassword("");
+    setShowLogoutPrompt(false);
+    router.push("/home");
   }
 
   function handleLogout() {
@@ -105,6 +154,8 @@ export default function TopRightHamburger() {
     setUsername("");
     setPassword("");
     setAuthError("");
+    setShowLogoutPrompt(false);
+    router.push("/");
   }
 
   return (
@@ -137,11 +188,42 @@ export default function TopRightHamburger() {
       </div>
 
       {signedInUser && (
-        <div className={styles.userStatus}>
-          <span className={styles.userName}>@{signedInUser}</span>
-          <button type="button" className={styles.logoutButton} onClick={handleLogout} aria-label="Log out">
-            <IconDoor />
+        <div className={styles.userMenu} ref={userMenuRef}>
+          <button
+            type="button"
+            className={styles.userStatusButton}
+            onClick={() => setShowLogoutPrompt((previous) => !previous)}
+            aria-haspopup="dialog"
+            aria-expanded={showLogoutPrompt}
+            aria-label={`Open account options for ${signedInUser}`}
+          >
+            <span className={styles.userName}>{signedInUser}</span>
+            <span className={styles.userDoorPanel} aria-hidden="true">
+              <IconDoor />
+            </span>
           </button>
+
+          {showLogoutPrompt && (
+            <div className={styles.logoutPrompt} role="dialog" aria-label="Log out options">
+              <p className={styles.logoutPromptText}>Log out from this account?</p>
+              <div className={styles.logoutPromptActions}>
+                <button
+                  type="button"
+                  className={styles.promptButton}
+                  onClick={() => setShowLogoutPrompt(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.promptButton} ${styles.promptButtonDanger}`}
+                  onClick={handleLogout}
+                >
+                  Log out
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -185,7 +267,7 @@ export default function TopRightHamburger() {
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
         <nav className={styles.sidebarNav}>
           <Link
-            href="/"
+            href={homeHref}
             className={`${styles.sidebarItem} ${styles.sidebarItemActive}`}
             onClick={() => setOpen(false)}
           >
