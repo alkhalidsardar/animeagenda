@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import styles from "./TopRightHamburger.module.css";
 
 const IconHome = () => (
@@ -52,8 +52,30 @@ const IconGuide = () => (
   </svg>
 );
 
+const IconDoor = () => (
+  <svg viewBox="0 0 24 24" className={styles.logoutIcon} aria-hidden="true">
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M13 4h6a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-6M10 17l-3-3 3-3M7 14h8M4 4h6a1 1 0 0 1 1 1v3M4 20h6a1 1 0 0 0 1-1v-3"
+    />
+  </svg>
+);
+
 export default function TopRightHamburger() {
   const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [signedInUser, setSignedInUser] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return window.localStorage.getItem("animeagenda_user");
+  });
+  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -62,9 +84,32 @@ export default function TopRightHamburger() {
     };
   }, [open]);
 
+  function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextUser = username.trim();
+
+    if (!nextUser || !password) {
+      setAuthError("Enter username and password.");
+      return;
+    }
+
+    setSignedInUser(nextUser);
+    window.localStorage.setItem("animeagenda_user", nextUser);
+    setAuthError("");
+    setPassword("");
+  }
+
+  function handleLogout() {
+    setSignedInUser(null);
+    window.localStorage.removeItem("animeagenda_user");
+    setUsername("");
+    setPassword("");
+    setAuthError("");
+  }
+
   return (
     <>
-      <div className={styles.wrapper}>
+      <div className={styles.buttonWrapper}>
         <button
           type="button"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -90,6 +135,52 @@ export default function TopRightHamburger() {
           </svg>
         </button>
       </div>
+
+      {signedInUser && (
+        <div className={styles.userStatus}>
+          <span className={styles.userName}>@{signedInUser}</span>
+          <button type="button" className={styles.logoutButton} onClick={handleLogout} aria-label="Log out">
+            <IconDoor />
+          </button>
+        </div>
+      )}
+
+      {!signedInUser && (
+        <div className={styles.wrapper}>
+          <form className={styles.authPanel} onSubmit={handleAuthSubmit}>
+            <p className={styles.authLabel}>Account</p>
+
+            <div className={styles.authFields}>
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                autoComplete="username"
+                aria-label="Username"
+                className={styles.authInput}
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                autoComplete="current-password"
+                aria-label="Password"
+                className={styles.authInput}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </div>
+
+            {authError && <p className={styles.authError}>{authError}</p>}
+
+            <button type="submit" className={`${styles.authButton} ${styles.authButtonPrimary}`}>
+              Sign up / Login
+            </button>
+          </form>
+        </div>
+      )}
 
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
         <nav className={styles.sidebarNav}>
